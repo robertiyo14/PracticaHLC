@@ -1,1 +1,17 @@
+body{
+    background-image: url("img/fondo.jpg");
+    background-size: cover;
+    font-family: serif;
+}
 
+.canvas{
+    width: 1000px;
+    height: 500px;
+    margin: 0 auto;
+}
+
+#canvas{
+    width: 1000px;
+    height: 500px;;
+    background:#999;
+}

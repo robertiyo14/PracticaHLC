@@ -36,7 +36,7 @@ var KEY_DOWN = 40;
 function init() {
     canvas = document.getElementById('canvas');//Recogemos el canvas
     ctx = canvas.getContext('2d');//Establecemos el contexto
-    resize();//Lo redimensionamos para que ocupe toda la pantalla
+    //resize();//Lo redimensionamos para que ocupe toda la pantalla
     run();//Y por último pintamos los elementos del canvas
     repaint();
 }
