@@ -4,6 +4,34 @@ body{
     font-family: serif;
 }
 
+@font-face{
+    font-family: "zombie";
+    src: url(assets/zombie.ttf);
+}
+
+.titulo{
+    font-family: zombie;
+    text-align: center;
+    color: darkred;
+    font-size: 5em;
+    font-weight: normal;
+    margin: 0px;
+    paddint: 0px;
+}
+
+.botones{
+    width: 1000px;
+    height: 30px;
+    margin: 0 auto;
+}
+
+.inicio{
+    width: 1000px;
+    height: 500px;
+    margin: 0 auto; 
+    visibility: hidden;
+}
+
 .canvas{
     width: 1000px;
     height: 500px;
@@ -16,7 +44,12 @@ body{
     background:#999;
 }
 
-.titulo{
-    text-align: center;
-    color: white;
+button{
+    font-family: zombie;
+    font-size: 1.5em;
+    color: #C60;
+    background-image: url("img/boton.jpg");
+    border: none;
+    width: 150px;
+    height: 30px;
 }
