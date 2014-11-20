@@ -15,3 +15,8 @@ body{
     height: 500px;;
     background:#999;
 }
+
+.titulo{
+    text-align: center;
+    color: white;
+}
