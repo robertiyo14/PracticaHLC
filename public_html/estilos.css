@@ -52,4 +52,6 @@ button{
     border: none;
     width: 150px;
     height: 30px;
+    display: block;
+    float: left;
 }
