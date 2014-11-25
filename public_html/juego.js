@@ -1,3 +1,22 @@
+//Diseño
+
+function marcarBotones(x){
+    var inicio = Document.getElementById('btInicio');
+    var instrucciones = Document.getElementById('btInstrucciones');
+    var about = Document.getElementById('btAbout');
+    switch(x){
+        case 0:
+            
+            init();
+            break;
+        case 1:
+            
+            break;
+        case 2:
+            
+            break;
+    }
+}
 
 //(function(){
 //Redimensiona el canvas para que ocupe toda la pantalla

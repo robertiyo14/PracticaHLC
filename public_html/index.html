@@ -11,17 +11,17 @@
     <body>
         <h1 class="titulo">Cave Runner</h1>
         <div class="botones">
-            <button class="Inicio" name="inicio">Inicio</button>
-            <button class="Empezar" name="empezar" value="Emepzar" onclick="init();">Empezar</button>
-            <button class="About" name="about">Acerca de</button>
+            <a id="btInicio" name="inicio" onclick="marcarBotones(0);">Inicio</a>
+            <a id="btInstrucciones" name="inicio">Instrucciones</a>
+            <a id="btAbout" name="about">Acerca de</a>
+        </div>
+        <div class="inicio">
+            <img src="img/inicio.jpg"/>
         </div>
         <div class="canvas">
             <canvas id="canvas">
                 Canvas not supported by your browser.
             </canvas>
         </div>
-        <!--<div class="inicio">
-            <img src="img/inicio.jpg"/>
-        </div>-->
     </body>
 </html>
