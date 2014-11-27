@@ -69,24 +69,6 @@ a{
     cursor: default;
 }
 
-a:hover{
-    background-image: url("img/botonActivo.png");
-}
-
-a:visited{
-    font-family: zombie;
-    font-size: 1.5em;
-    text-align: center;
-    color: #C60;
-    background-image: url("img/botonActivo.png");
-    border: none;
-    width: 150px;
-    height: 30px;
-    display: block;
-    float: left;
-    outline: 0;
-}
-
 #btInicio{
     margin-left: 40px;
 }

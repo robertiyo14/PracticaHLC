@@ -1,19 +1,33 @@
 //Diseño
 
 function marcarBotones(x){
-    var inicio = Document.getElementById('btInicio');
-    var instrucciones = Document.getElementById('btInstrucciones');
-    var about = Document.getElementById('btAbout');
+    var btinicio = document.getElementById('btInicio');
+    var btinstrucciones = document.getElementById('btInstrucciones');
+    var btabout = document.getElementById('btAbout');
+    var inicio = document.getElementById('inicio');
+    var instrucciones = document.getElementById('instrucciones');
     switch(x){
         case 0:
-            
+            btinicio.style.background = "url('img/botonActivo.png')";
+            btinstrucciones.style.background = "url('img/boton.png')";
+            btabout.style.background = "url('img/boton.png')";
+            inicio.style.display = "block";
+            instrucciones.style.display = "none";
             init();
             break;
         case 1:
-            
+            btinicio.style.background = "url('img/boton.png')";
+            btinstrucciones.style.background = "url('img/botonActivo.png')";
+            btabout.style.background = "url('img/boton.png')";
+            inicio.style.display = "none";
+            instrucciones.style.display = "block";
             break;
         case 2:
-            
+            btinicio.style.background = "url('img/boton.png')";
+            btinstrucciones.style.background = "url('img/boton.png')";
+            btabout.style.background = "url('img/botonActivo.png')";
+            break;
+        default:
             break;
     }
 }
