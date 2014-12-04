@@ -28,12 +28,13 @@ body{
 }
 
 .inicio{
-    width: 1000px;
-    height: 500px;
+    width: 920px;
+    height: 450px;
     margin: 0 auto; 
     padding: 40px;
     padding-top: 0px;
     display: none;
+    background-image: url("img/marco.png");
 }
 
 .canvas{
@@ -47,6 +48,34 @@ body{
     
 }
 
+.about{
+    width: 920px;
+    height: 450px;
+    margin: 0 auto; 
+    padding: 40px;
+    padding-top: 0px;
+    display: none;
+    background-image: url("img/marco.png");
+}
+
+.tituloAbout{
+    margin: 0 auto;
+    font-family: zombie;
+    font-weight: bold;
+    font-size: 30px;
+    color: darkred;
+    padding: 30px;
+}
+
+.contenidoAbout{
+    margin: 0 auto;
+    font-family: zombie;
+    font-weight: bold;
+    font-size: 30px;
+    text-align: center;
+    color: darkred;
+}
+
 #canvas{
     width: 920px;
     height: 450px;
@@ -58,7 +87,7 @@ a{
     font-family: zombie;
     font-size: 1.5em;
     text-align: center;
-    color: #C60;
+    color: #fff;
     background-image: url("img/boton.png");
     border: none;
     width: 150px;
@@ -71,4 +100,8 @@ a{
 
 #btInicio{
     margin-left: 40px;
+}
+
+.clear{
+    clear: both;
 }

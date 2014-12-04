@@ -9,6 +9,7 @@ function marcarBotones(x){
     var btabout = document.getElementById('btAbout');
     var inicio = document.getElementById('inicio');
     var instrucciones = document.getElementById('instrucciones');
+    var about = document.getElementById('about');
     switch(x){
         case 0:
             btinicio.style.background = "url('img/botonActivo.png')";
@@ -16,6 +17,7 @@ function marcarBotones(x){
             btabout.style.background = "url('img/boton.png')";
             inicio.style.display = "block";
             instrucciones.style.display = "none";
+            about.style.display = "none";
             init();
             break;
         case 1:
@@ -24,18 +26,22 @@ function marcarBotones(x){
             btabout.style.background = "url('img/boton.png')";
             inicio.style.display = "none";
             instrucciones.style.display = "block";
+            about.style.display = "none";
             break;
         case 2:
             btinicio.style.background = "url('img/boton.png')";
             btinstrucciones.style.background = "url('img/boton.png')";
             btabout.style.background = "url('img/botonActivo.png')";
+            inicio.style.display = "none";
+            instrucciones.style.display = "none";
+            about.style.display = "block";
             break;
         default:
             break;
     }
 }
 
-window.addEventListener('load', init, false);
+//window.addEventListener('load', init, false);
 var canvas = null;
 var ctx = null;
 var spriteTiles = null;
