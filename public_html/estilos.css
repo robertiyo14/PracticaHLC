@@ -1,5 +1,5 @@
 body{
-    background-image: url("img/fondo.jpg");
+    background-image: url("img/fondo.png");
     background-size: cover;
     font-family: serif;
 }
@@ -13,10 +13,17 @@ body{
     font-family: zombie;
     text-align: center;
     color: darkred;
-    font-size: 5em;
+    font-size: 80px;
     font-weight: normal;
     margin: 0px;
     padding: 0px;
+}
+
+.arriba{
+    width: 1300px;
+    height: 135px;
+    margin: 0 auto;
+    background-image: url("img/arriba.png");
 }
 
 .botones{
@@ -24,38 +31,29 @@ body{
     height: 30px;
     margin: 0 auto;
     padding-top: 10px;
-    background-image: url("img/arriba.png");
+}
+
+.inicio, .canvas, .about{
+    width: 500px;
+    height: 350px;
+    margin: 0 auto; 
+    padding: 400px;
+    padding-bottom: 140px;
+    padding-top: 0px;
+    display: none;
+    background-image: url("img/marco.png");
 }
 
 .inicio{
-    width: 920px;
-    height: 450px;
-    margin: 0 auto; 
-    padding: 40px;
-    padding-top: 0px;
-    display: none;
-    background-image: url("img/marco.png");
+    display: block;
 }
 
 .canvas{
-    width: 920px;
-    height: 450px;
-    margin: 0 auto;
-    padding: 40px;
-    padding-top: 0px;
-    display: block;
-    background-image: url("img/marco.png");
-    
+    display: none;    
 }
 
 .about{
-    width: 920px;
-    height: 450px;
-    margin: 0 auto; 
-    padding: 40px;
-    padding-top: 0px;
     display: none;
-    background-image: url("img/marco.png");
 }
 
 .tituloAbout{
@@ -77,17 +75,17 @@ body{
 }
 
 #canvas{
-    width: 920px;
-    height: 450px;
+    width: 500px;
+    height: 350px;
     margin: 0 auto;
-    background:#999;
+    background:#000;
 }
 
 a{
     font-family: zombie;
     font-size: 1.5em;
     text-align: center;
-    color: #fff;
+    color: darkred;
     background-image: url("img/boton.png");
     border: none;
     width: 150px;
@@ -99,7 +97,7 @@ a{
 }
 
 #btInicio{
-    margin-left: 40px;
+    margin-left: 275px;
 }
 
 .clear{
