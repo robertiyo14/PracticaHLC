@@ -1,12 +1,12 @@
 
 /*********************************************************************/
 /*                                                                   */
-/*                             Menu                                  */ 
+/*                             Menu                                  */
 /*                                                                   */
 /*********************************************************************/
 
 //Función que se utiliza para darle funcionalidad a los botones del menú
-function marcarBotones(x){
+function marcarBotones(x) {
     //Declarar los botones
     var btinicio = document.getElementById('btInicio');
     var btinstrucciones = document.getElementById('btInstrucciones');
@@ -16,7 +16,7 @@ function marcarBotones(x){
     var instrucciones = document.getElementById('instrucciones');
     var about = document.getElementById('about');
     //En cada caso:
-    switch(x){
+    switch (x) {
         //Muestra el Canvas del juego
         case 0:
             //Le damos estilos a los botones, para remarcar el que está pulsado
@@ -30,7 +30,7 @@ function marcarBotones(x){
             //La funcion init es la que inicia el juego
             init();
             break;
-        //Muestra las instrucciones
+            //Muestra las instrucciones
         case 1:
             //Le damos estilos a los botones, para remarcar el que está pulsado
             btinicio.style.background = "url('img/boton.png')";
@@ -41,7 +41,7 @@ function marcarBotones(x){
             instrucciones.style.display = "block";
             about.style.display = "none";
             break;
-        //Muestra nuestra información personal
+            //Muestra nuestra información personal
         case 2:
             //Le damos estilos a los botones, para remarcar el que está pulsado
             btinicio.style.background = "url('img/boton.png')";
@@ -56,20 +56,15 @@ function marcarBotones(x){
             break;
     }
 }
-    
+
 /*********************************************************************/
 /*                                                                   */
-/*                             Juego                                 */ 
+/*                             Juego                                 */
 /*                                                                   */
 /*********************************************************************/
 
 var canvas = null;
 var ctx = null;
-var spriteTiles = null;
-var spriteLeftAnim = null;
-var spriteRightAnim = null;
-var spriteTopAnim = null;
-var spriteBotAnim = null;
 var player = null;
 var then = Date.now();
 
@@ -77,13 +72,24 @@ function init() {
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-    spriteTiles = new Tileset('img/sprite.png', 32, 32);
-    spriteLeftAnim = new Animation(spriteTiles, ['0,1', '1,1', '2,1'], 200);
-    spriteRightAnim = new Animation(spriteTiles, ['0,2', '1,2', '2,2'], 200);
-    spriteTopAnim = new Animation(spriteTiles, ['0,3', '1,3', '2,3'], 200);
-    spriteBotAnim = new Animation(spriteTiles, ['0,0', '1,0', '2,0'], 200);
-    player = new Sprite({'left': spriteLeftAnim, 'right': spriteRightAnim, 'top': spriteTopAnim, 'bot': spriteBotAnim}, 'right', canvas.width / 2, canvas.height / 2, 25, 25, 50);
     setMap(map, 10, 50);
+    var spriteTiles = new Tileset('img/sprite.png', 32, 32);
+    var spriteLeftAnim = new Animation(spriteTiles, ['0,1', '1,1', '2,1'], 200);
+    var spriteRightAnim = new Animation(spriteTiles, ['0,2', '1,2', '2,2'], 200);
+    var spriteTopAnim = new Animation(spriteTiles, ['0,3', '1,3', '2,3'], 200);
+    var spriteBotAnim = new Animation(spriteTiles, ['0,0', '1,0', '2,0'], 200);
+    player = new Sprite({
+            'left': spriteLeftAnim,
+            'right': spriteRightAnim,
+            'top': spriteTopAnim,
+            'bot': spriteBotAnim}, //Animación del Personaje
+            'bot', //Animación actual
+            start.x+8, //Posición x
+            start.y+8, //Posicion y
+            35, //Tamaño x
+            35, //Tamaño y
+            100 //Velocidad
+            );
     setInterval(run, 10);
     //run();
 }
@@ -180,6 +186,15 @@ function update(mod) {
     }
 }
 
+Rectangle.prototype.intersects = function (rect) {
+    if (rect != null) {
+        return(this.x < rect.x + rect.width &&
+                this.x + this.width > rect.x &&
+                this.y < rect.y + rect.height &&
+                this.y + this.height > rect.y);
+    }
+}
+
 tabla = new Image();
 tabla.src = 'img/tabla.png';
 piedra = new Image();
@@ -188,24 +203,33 @@ fondo = new Image();
 fondo.src = 'img/black_bg.png';
 
 function render() {
-    //ctx.fillStyle = '#000';
-    //ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(fondo, 0, 0, 350, 500);
-    for(var i=0; i<wood.length; i++){
-        ctx.drawImage(tabla, wood[i].x, wood[i].y, wood[i].width, wood[i].height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    //Pintar Tablas de madera
+    for (var i = 0; i < wood.length; i++) {
+        ctx.drawImage(tabla, wood[i].x, wood[i].y);
     }
-    
-    for(var i=0; i<stone.length; i++){
+
+    //Pintar Piedras
+    for (var i = 0; i < stone.length; i++) {
         ctx.drawImage(piedra, stone[i].x, stone[i].y);
     }
+
+    //Pintar Inicio y fin
+    ctx.drawImage(piedra, start.x, start.y);
+    ctx.drawImage(piedra, finish.x, finish.y);
+
+    //Pintar Jugador
     drawSprite(player);
-    
+
     /*ctx.fillStyle = '#fff';
-    ctx.font = '15pt Arial';
-    ctx.textBaseline = 'top';
-    ctx.fillText('Arrow keys to move left and right', 15, 15);*/
+     ctx.font = '15pt Arial';
+     ctx.textBaseline = 'top';
+     ctx.fillText('Arrow keys to move left and right', 15, 15);*/
 }
 
+//Hace correr el juego
 function run() {
     update((Date.now() - then) / 1000);
     if (game.images == game.imagesLoaded) {
@@ -214,62 +238,55 @@ function run() {
     then = Date.now();
 }
 
-//nuevo
-function Rectangle(x,y,width,height){
-        this.x=(x==null)?0:x;
-        this.y=(y==null)?0:y;
-        this.width=(width==null)?0:width;
-        this.height=(height==null)?this.width:height;
+//Función para crear objetos rectangulares.
+function Rectangle(x, y, width, height) {
+    this.x = (x == null) ? 0 : x;
+    this.y = (y == null) ? 0 : y;
+    this.width = (width == null) ? 0 : width;
+    this.height = (height == null) ? this.width : height;
 }
-    
-var map=[
-    2,1,1,1,1,2,1,1,1,1,
-    1,1,2,1,1,1,1,1,1,1,
-    2,1,1,1,1,2,1,1,1,1,
-    1,2,1,1,1,1,1,1,1,1,
-    1,1,1,1,2,1,1,1,1,1,
-    1,1,1,1,1,1,2,1,1,1,
-    1,1,1,1,1,1,1,1,2,1
+
+//Declaración de mapas
+var map = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 4, 0, 1, 1, 1, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 0, 1, 0,
+    0, 2, 0, 0, 1, 0, 1, 1, 1, 0,
+    0, 1, 1, 1, 2, 0, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 2, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 0
 ];
 
-//var map=[
-//    0,0,0,0,0,0,0,0,0,0,
-//    0,0,2,0,1,1,1,1,1,0,
-//    0,1,1,0,1,0,0,0,1,0,
-//    0,2,0,0,1,0,1,1,1,0,
-//    0,1,1,1,2,0,1,0,0,0,
-//    0,0,0,0,0,0,2,1,1,0,
-//    0,0,0,0,0,0,0,0,3,0
-//];
-//var map = [
-//    1,1,1,1,1,1,
-//    1,0,2,2,0,1,
-//    1,1,1,1,1,1
-//];
-var pressing = [];
-var pause;
-var gameover = true;
 var stone = [];
 var wood = [];
-var finish = [];
+var black = [];
+var start = new Rectangle();
+var finish = new Rectangle();
 
-function setMap(map,columns,blockSize){
-        var col=0;
-        var row=0;
-        stone.length=0;
-        wood.length=0;
-        for(var i=0,l=map.length;i<l;i++){
-            if(map[i]==1)
-                wood.push(new Rectangle(col*blockSize,row*blockSize,blockSize,blockSize));
-            else if(map[i]==2)
-                stone.push(new Rectangle(col*blockSize,row*blockSize,blockSize,blockSize));
-            col++
-            if(col>=columns){
-                row++;
-                col=0;
-            }
+//Desglosar la matriz del mapa en arrays con los componentes
+function setMap(map, columns, blockSize) {
+    var col = 0;
+    var row = 0;
+    stone.length = 0;
+    wood.length = 0;
+    for (var i = 0, l = map.length; i < l; i++) {
+        if (map[i] == 0)
+            black.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 1)
+            wood.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 2)
+            stone.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 3)
+            finish = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
+        else if (map[i] == 4)
+            start = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
+        col++;
+        if (col >= columns) {
+            row++;
+            col = 0;
         }
-
-        //worldWidth=columns*blockSize;
-        //worldHeight=row*blockSize;
     }
+
+    //worldWidth=columns*blockSize;
+    //worldHeight=row*blockSize;
+}
