@@ -71,6 +71,7 @@ var spriteRightAnim = null;
 var spriteTopAnim = null;
 var spriteBotAnim = null;
 var player = null;
+var then = Date.now();
 
 function init() {
 
@@ -83,7 +84,8 @@ function init() {
     spriteBotAnim = new Animation(spriteTiles, ['0,0', '1,0', '2,0'], 200);
     player = new Sprite({'left': spriteLeftAnim, 'right': spriteRightAnim, 'top': spriteTopAnim, 'bot': spriteBotAnim}, 'right', canvas.width / 2, canvas.height / 2, 25, 25, 50);
     setMap(map, 10, 50);
-    run();
+    setInterval(run, 10);
+    //run();
 }
 
 function imageLoaded() {
@@ -178,9 +180,24 @@ function update(mod) {
     }
 }
 
+tabla = new Image();
+tabla.src = 'img/tabla.png';
+piedra = new Image();
+piedra.src = 'img/piedra.png';
+fondo = new Image();
+fondo.src = 'img/black_bg.png';
+
 function render() {
-    ctx.fillStyle = game.backgroundColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //ctx.fillStyle = '#000';
+    //ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(fondo, 0, 0, 350, 500);
+    for(var i=0; i<wood.length; i++){
+        ctx.drawImage(tabla, wood[i].x, wood[i].y, wood[i].width, wood[i].height);
+    }
+    
+    for(var i=0; i<stone.length; i++){
+        ctx.drawImage(piedra, stone[i].x, stone[i].y);
+    }
     drawSprite(player);
     
     /*ctx.fillStyle = '#fff';
@@ -197,19 +214,38 @@ function run() {
     then = Date.now();
 }
 
-var then = Date.now();
-setInterval(run, 10);
-
 //nuevo
+function Rectangle(x,y,width,height){
+        this.x=(x==null)?0:x;
+        this.y=(y==null)?0:y;
+        this.width=(width==null)?0:width;
+        this.height=(height==null)?this.width:height;
+}
+    
 var map=[
-    0,0,0,0,0,0,0,0,0,0,
-    0,0,2,0,1,1,1,1,1,0,
-    0,1,1,0,1,0,0,0,1,0,
-    0,2,0,0,1,0,1,1,1,0,
-    0,1,1,1,2,0,1,0,0,0,
-    0,0,0,0,0,0,2,1,1,0,
-    0,0,0,0,0,0,0,0,3,0
+    2,1,1,1,1,2,1,1,1,1,
+    1,1,2,1,1,1,1,1,1,1,
+    2,1,1,1,1,2,1,1,1,1,
+    1,2,1,1,1,1,1,1,1,1,
+    1,1,1,1,2,1,1,1,1,1,
+    1,1,1,1,1,1,2,1,1,1,
+    1,1,1,1,1,1,1,1,2,1
 ];
+
+//var map=[
+//    0,0,0,0,0,0,0,0,0,0,
+//    0,0,2,0,1,1,1,1,1,0,
+//    0,1,1,0,1,0,0,0,1,0,
+//    0,2,0,0,1,0,1,1,1,0,
+//    0,1,1,1,2,0,1,0,0,0,
+//    0,0,0,0,0,0,2,1,1,0,
+//    0,0,0,0,0,0,0,0,3,0
+//];
+//var map = [
+//    1,1,1,1,1,1,
+//    1,0,2,2,0,1,
+//    1,1,1,1,1,1
+//];
 var pressing = [];
 var pause;
 var gameover = true;
@@ -233,6 +269,7 @@ function setMap(map,columns,blockSize){
                 col=0;
             }
         }
+
         //worldWidth=columns*blockSize;
         //worldHeight=row*blockSize;
     }
