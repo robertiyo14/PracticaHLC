@@ -67,9 +67,13 @@ var canvas = null;
 var ctx = null;
 var player = null;
 var then = Date.now();
+var pause = false;
+var gameover;
+var pisamadera = false;
+var maderaactual = null;
 
 function init() {
-
+    gameover = false;
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     setMap(map, 10, 50);
@@ -90,6 +94,7 @@ function init() {
             35, //Tamaño y
             100 //Velocidad
             );
+    
     setInterval(run, 10);
     //run();
 }
@@ -149,6 +154,11 @@ function updateAnimation(anim) {
     }
 }
 
+//function startAnimation(anim) {
+//    if((~~(aTimer*10)%8)==100)
+//        anim.currentFrame++;
+//}
+
 var game = {
     images: 0,
     imagesLoaded: 0,
@@ -156,42 +166,108 @@ var game = {
 };
 
 var keysDown = {};
+var lastPress;
 window.addEventListener('keydown', function (e) {
     keysDown[e.keyCode] = true;
+    lastPress = e.keyCode;
 });
 window.addEventListener('keyup', function (e) {
     delete keysDown[e.keyCode];
 });
 
 function update(mod) {
-    if (37 in keysDown) {
-        player.currentState = 'left';
-        player.x -= player.speed * mod;
-        updateAnimation(player.stateAnimations[player.currentState]);
-    }
-    else if (39 in keysDown) {
-        player.currentState = 'right';
-        player.x += player.speed * mod;
-        updateAnimation(player.stateAnimations[player.currentState]);
-    }
-    else if (38 in keysDown) {
-        player.currentState = 'top';
-        player.y -= player.speed * mod;
-        updateAnimation(player.stateAnimations[player.currentState]);
-    }
-    else if (40 in keysDown) {
-        player.currentState = 'bot';
-        player.y += player.speed * mod;
-        updateAnimation(player.stateAnimations[player.currentState]);
+    if(!pause && !gameover){
+        if (37 in keysDown) {
+            player.currentState = 'left';
+            player.x -= player.speed * mod;
+            updateAnimation(player.stateAnimations[player.currentState]);
+            for(var i=0;i<black.length;i++){
+                if(player.intersects(black[i])){
+                    gameover = true;
+                }
+            }
+            for(var i=0;i<wood.length;i++){
+                if(player.intersects(wood[i])){
+                    maderaactual = wood[i];
+                    aTimer = 0;
+                    pisamadera = true;
+                }
+            }
+        }
+        else if (39 in keysDown) {
+            player.currentState = 'right';
+            player.x += player.speed * mod;
+            updateAnimation(player.stateAnimations[player.currentState]);
+            for(var i=0;i<black.length;i++){
+                if(player.intersects(black[i])){
+                    gameover = true;
+                }
+            }
+            for(var i=0;i<wood.length;i++){
+                if(player.intersects(wood[i])){
+                    maderaactual = wood[i];
+                    aTimer=0;
+                    pisamadera = true;
+                }
+            }
+        }
+        else if (38 in keysDown) {
+            player.currentState = 'top';
+            player.y -= player.speed * mod;
+            updateAnimation(player.stateAnimations[player.currentState]);
+            for(var i=0;i<black.length;i++){
+                if(player.intersects(black[i])){
+                    gameover = true;
+                }
+            }
+            for(var i=0;i<wood.length;i++){
+                if(player.intersects(wood[i])){
+                    maderaactual = wood[i];
+                    aTimer=0;
+                    pisamadera = true;
+                }
+            }
+            
+        }
+        else if (40 in keysDown) {
+            player.currentState = 'bot';
+            player.y += player.speed * mod;
+            updateAnimation(player.stateAnimations[player.currentState]);
+            for(var i=0;i<black.length;i++){
+                if(player.intersects(black[i])){
+                    gameover = true;
+                }
+            }
+            for(var i=0;i<wood.length;i++){
+                if(player.intersects(wood[i])){
+                    maderaactual = wood[i];
+                    aTimer=0;
+                    pisamadera = true;
+                }
+            }
+        } else if (lastPress == 13){
+            pause = true;
+            lastPress = null;
+        }
+        
+        aTimer+=mod;
+        if(aTimer>1){
+            aTimer-=1;
+            pisamadera = false;
+        }
+    } else if (lastPress == 13){
+        pause = false;
+        lastPress = null;
     }
 }
 
-Rectangle.prototype.intersects = function (rect) {
+Sprite.prototype.intersects = function (rect) {
     if (rect != null) {
-        return(this.x < rect.x + rect.width &&
-                this.x + this.width > rect.x &&
-                this.y < rect.y + rect.height &&
-                this.y + this.height > rect.y);
+        return(this.x < rect.x + rect.width -17 && //Izquierda
+                this.x + this.width -17 > rect.x && //Derecha
+                this.y < rect.y + rect.height -26 && //Arriba
+                this.y + this.height -8 > rect.y); //Abajo
+        //Los números que se restan son para compensar la posición del personaje
     }
 }
 
@@ -199,8 +275,6 @@ tabla = new Image();
 tabla.src = 'img/tabla.png';
 piedra = new Image();
 piedra.src = 'img/piedra.png';
-fondo = new Image();
-fondo.src = 'img/black_bg.png';
 
 function render() {
     ctx.fillStyle = '#000';
@@ -209,6 +283,9 @@ function render() {
     //Pintar Tablas de madera
     for (var i = 0; i < wood.length; i++) {
         ctx.drawImage(tabla, wood[i].x, wood[i].y);
+        //drawSprite(wood[i]);
+        //startAnimation(wood[i].stateAnimations[wood[i].currentState]);
+        //wood[i].drawImageArea(ctx,cam,spritesheet,50,50+(~~(aTimer*10)%8)*50,50,50);
     }
 
     //Pintar Piedras
@@ -227,6 +304,34 @@ function render() {
      ctx.font = '15pt Arial';
      ctx.textBaseline = 'top';
      ctx.fillText('Arrow keys to move left and right', 15, 15);*/
+    if(pause){
+        ctx.fillStyle = '#fff';
+        ctx.font = '80pt Arial';
+        ctx.textBaseline = 'top';
+        ctx.fillText('PAUSE!', 55, 95);
+    }
+    
+    ctx.fillStyle = '#fff';
+        ctx.font = '20pt Arial';
+        ctx.textBaseline = 'top';
+        ctx.fillText('aTimer = '+aTimer, 5, 5);
+    
+    if(gameover){
+        ctx.fillStyle = 'darkred';
+        ctx.font = '60pt zombie';
+        ctx.textBaseline = 'top';
+        ctx.fillText('GAME OVER', 55, 115);
+    }
+    
+    if(pisamadera){
+        //ctx.fillRect(maderaactual.x, maderaactual.y, maderaactual.x+50, maderaactual.y+50);
+        var index = wood.indexOf(maderaactual);
+        if (index > -1) {
+            wood.splice(index, 1);
+        }
+        maderaactual.drawImageArea(ctx,cam,spritesheet,0,0+(~~(aTimer*7)%9)*50,50,50);
+        //pisamadera = false;
+    }
 }
 
 //Hace correr el juego
@@ -269,10 +374,16 @@ function setMap(map, columns, blockSize) {
     var row = 0;
     stone.length = 0;
     wood.length = 0;
+    //var spriteTiles2 = new Tileset('img/sprites2.png', 50, 50);
+    //var spriteWoodDownAnim = new Animation(spriteTiles2, ['0,1','1,1','0,2','1,2',
+    //    '0,3','1,3','0,4','1,4','0,5','1,5'], 100);
+    //var spriteWoodAnim = new Animation (spriteTiles2, ['0,1'], 0);
+    //spritewood = new Sprite({'on': spriteWoodDownAnim, 'off': spriteWoodAnim}, 'off', x, y, 50, 50, 100);
     for (var i = 0, l = map.length; i < l; i++) {
         if (map[i] == 0)
             black.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
         else if (map[i] == 1)
+            //wood.push(new Sprite({'on': spriteWoodDownAnim, 'off': spriteWoodAnim}, 'on', col * blockSize, row * blockSize, 50, 50, 100))
             wood.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
         else if (map[i] == 2)
             stone.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
@@ -290,3 +401,28 @@ function setMap(map, columns, blockSize) {
     //worldWidth=columns*blockSize;
     //worldHeight=row*blockSize;
 }
+
+var cam=new Camera();
+var aTimer=0;
+var spritesheet=new Image();
+    spritesheet.src='img/sprites2.png';
+    
+     Rectangle.prototype.drawImageArea=function(ctx,cam,img,sx,sy,sw,sh){
+        if(cam!=null){
+            if(img.width)
+                ctx.drawImage(img,sx,sy,sw,sh,this.x-cam.x,this.y-cam.y,this.width,this.height);
+            else
+                ctx.strokeRect(this.x-cam.x,this.y-cam.y,this.width,this.height);
+        }
+        else{
+            if(img.width)
+                ctx.drawImage(img,sx,sy,sw,sh,this.x,this.y,this.width,this.height);
+            else
+                ctx.strokeRect(this.x,this.y,this.width,this.height);
+        }
+    }
+
+    function Camera(){
+        this.x=0;
+        this.y=0;
+    }
