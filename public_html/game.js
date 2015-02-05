@@ -63,16 +63,59 @@ function marcarBotones(x) {
 /*                                                                   */
 /*********************************************************************/
 
+/*********************************************************************/
+/*                           Variables                               */
+/*********************************************************************/
+
+//Variables generales utilizadas en la aplicación
 var canvas = null;
 var ctx = null;
 var player = null;
 var then = Date.now();
 var pause = false;
 var gameover;
-var pisamadera = false;
-var maderaactual = null;
+
+//Variables para el key listener
+var keysDown = {};
+var lastPress;
+
+//Variable contar tiempo
+var aTimer=0;
+
+//Variables con las imagenes utilizadas
+var spritesheet=new Image();
+spritesheet.src='img/sprites2.png';
+var tabla = new Image();
+tabla.src = 'img/tabla.png';
+var piedra = new Image();
+piedra.src = 'img/piedra.png';
+var gameoverImg = new Image();
+gameoverImg.src = 'img/gameover.png';
+
+//Componentes del mapa
+var stone;
+var wood;
+var black;
+var start;
+var finish;
+
+//Declaración de mapas
+var map = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 4, 0, 1, 1, 1, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 0, 1, 0,
+    0, 2, 0, 0, 1, 0, 1, 1, 1, 0,
+    0, 1, 1, 1, 2, 0, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 2, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 3, 0
+];
 
 function init() {
+    stone = [];
+    wood = [];
+    black = [];
+    start = new Rectangle();
+    finish = new Rectangle();
     gameover = false;
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
@@ -97,6 +140,31 @@ function init() {
     
     setInterval(run, 10);
     //run();
+}
+
+//Desglosar la matriz del mapa en arrays con los componentes
+function setMap(map, columns, blockSize) {
+    var col = 0;
+    var row = 0;
+    stone.length = 0;
+    wood.length = 0;
+    for (var i = 0, l = map.length; i < l; i++) {
+        if (map[i] == 0)
+            black.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 1)
+            wood.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 2)
+            stone.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
+        else if (map[i] == 3)
+            finish = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
+        else if (map[i] == 4)
+            start = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
+        col++;
+        if (col >= columns) {
+            row++;
+            col = 0;
+        }
+    }
 }
 
 function imageLoaded() {
@@ -154,19 +222,12 @@ function updateAnimation(anim) {
     }
 }
 
-//function startAnimation(anim) {
-//    if((~~(aTimer*10)%8)==100)
-//        anim.currentFrame++;
-//}
-
 var game = {
     images: 0,
     imagesLoaded: 0,
     backgroundColor: '#000'
 };
 
-var keysDown = {};
-var lastPress;
 window.addEventListener('keydown', function (e) {
     keysDown[e.keyCode] = true;
     lastPress = e.keyCode;
@@ -186,13 +247,7 @@ function update(mod) {
                     gameover = true;
                 }
             }
-            for(var i=0;i<wood.length;i++){
-                if(player.intersects(wood[i])){
-                    maderaactual = wood[i];
-                    aTimer = 0;
-                    pisamadera = true;
-                }
-            }
+            interseccionMadera();
         }
         else if (39 in keysDown) {
             player.currentState = 'right';
@@ -203,13 +258,7 @@ function update(mod) {
                     gameover = true;
                 }
             }
-            for(var i=0;i<wood.length;i++){
-                if(player.intersects(wood[i])){
-                    maderaactual = wood[i];
-                    aTimer=0;
-                    pisamadera = true;
-                }
-            }
+            interseccionMadera();
         }
         else if (38 in keysDown) {
             player.currentState = 'top';
@@ -220,13 +269,7 @@ function update(mod) {
                     gameover = true;
                 }
             }
-            for(var i=0;i<wood.length;i++){
-                if(player.intersects(wood[i])){
-                    maderaactual = wood[i];
-                    aTimer=0;
-                    pisamadera = true;
-                }
-            }
+            interseccionMadera();
             
         }
         else if (40 in keysDown) {
@@ -238,26 +281,49 @@ function update(mod) {
                     gameover = true;
                 }
             }
-            for(var i=0;i<wood.length;i++){
-                if(player.intersects(wood[i])){
-                    maderaactual = wood[i];
-                    aTimer=0;
-                    pisamadera = true;
-                }
-            }
-        } else if (lastPress == 13){
+            interseccionMadera();
+            
+        } else if (lastPress == 80){
             pause = true;
             lastPress = null;
-        }
+        } 
         
-        aTimer+=mod;
-        if(aTimer>1){
-            aTimer-=1;
-            pisamadera = false;
-        }
-    } else if (lastPress == 13){
+            aTimer+=mod;
+            if(aTimer>1/10){
+                aTimer=0;
+                for(var i=0;i<wood.length;i++){
+                    if(wood[i].state < 10){
+                        wood[i].state++;
+                        if(wood[i].state == 10){
+                            black.push(wood[i]);
+                            var index = wood.indexOf(wood[i]);
+                            if (index > -1) {
+                                wood.splice(index, 1);
+                            }
+                        }
+                    } else if(wood[i].state > 11 && wood[i].state < 20) {
+                        wood[i].state++;
+                    } else if(wood[i].state == 20){
+                        wood[i].state = 0;
+                    }
+                }
+            }
+        
+    } else if (lastPress == 80){
         pause = false;
         lastPress = null;
+    } else if (lastPress == 32){
+        lastPress = null;
+        gameover = false;
+        init();
+    }
+}
+
+function interseccionMadera(){
+    for(var i=0;i<wood.length;i++){
+        if(player.intersects(wood[i]) && wood[i].state==11){
+            wood[i].state=12;
+        }
     }
 }
 
@@ -271,21 +337,16 @@ Sprite.prototype.intersects = function (rect) {
     }
 }
 
-tabla = new Image();
-tabla.src = 'img/tabla.png';
-piedra = new Image();
-piedra.src = 'img/piedra.png';
-
 function render() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     //Pintar Tablas de madera
     for (var i = 0; i < wood.length; i++) {
-        ctx.drawImage(tabla, wood[i].x, wood[i].y);
-        //drawSprite(wood[i]);
-        //startAnimation(wood[i].stateAnimations[wood[i].currentState]);
-        //wood[i].drawImageArea(ctx,cam,spritesheet,50,50+(~~(aTimer*10)%8)*50,50,50);
+        if(wood[i].state >= 11)
+            ctx.drawImage(tabla, wood[i].x, wood[i].y);
+        else
+            ctx.drawImage(spritesheet, 0, wood[i].state*50, 50, 50, wood[i].x, wood[i].y, 50, 50);
     }
 
     //Pintar Piedras
@@ -311,27 +372,10 @@ function render() {
         ctx.fillText('PAUSE!', 55, 95);
     }
     
-    ctx.fillStyle = '#fff';
-        ctx.font = '20pt Arial';
-        ctx.textBaseline = 'top';
-        ctx.fillText('aTimer = '+aTimer, 5, 5);
-    
     if(gameover){
-        ctx.fillStyle = 'darkred';
-        ctx.font = '60pt zombie';
-        ctx.textBaseline = 'top';
-        ctx.fillText('GAME OVER', 55, 115);
+        ctx.drawImage(gameoverImg,0,0);
     }
     
-    if(pisamadera){
-        //ctx.fillRect(maderaactual.x, maderaactual.y, maderaactual.x+50, maderaactual.y+50);
-        var index = wood.indexOf(maderaactual);
-        if (index > -1) {
-            wood.splice(index, 1);
-        }
-        maderaactual.drawImageArea(ctx,cam,spritesheet,0,0+(~~(aTimer*7)%9)*50,50,50);
-        //pisamadera = false;
-    }
 }
 
 //Hace correr el juego
@@ -349,80 +393,5 @@ function Rectangle(x, y, width, height) {
     this.y = (y == null) ? 0 : y;
     this.width = (width == null) ? 0 : width;
     this.height = (height == null) ? this.width : height;
+    this.state = 11;
 }
-
-//Declaración de mapas
-var map = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 4, 0, 1, 1, 1, 1, 1, 0,
-    0, 1, 1, 0, 1, 0, 0, 0, 1, 0,
-    0, 2, 0, 0, 1, 0, 1, 1, 1, 0,
-    0, 1, 1, 1, 2, 0, 1, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 2, 1, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 3, 0
-];
-
-var stone = [];
-var wood = [];
-var black = [];
-var start = new Rectangle();
-var finish = new Rectangle();
-
-//Desglosar la matriz del mapa en arrays con los componentes
-function setMap(map, columns, blockSize) {
-    var col = 0;
-    var row = 0;
-    stone.length = 0;
-    wood.length = 0;
-    //var spriteTiles2 = new Tileset('img/sprites2.png', 50, 50);
-    //var spriteWoodDownAnim = new Animation(spriteTiles2, ['0,1','1,1','0,2','1,2',
-    //    '0,3','1,3','0,4','1,4','0,5','1,5'], 100);
-    //var spriteWoodAnim = new Animation (spriteTiles2, ['0,1'], 0);
-    //spritewood = new Sprite({'on': spriteWoodDownAnim, 'off': spriteWoodAnim}, 'off', x, y, 50, 50, 100);
-    for (var i = 0, l = map.length; i < l; i++) {
-        if (map[i] == 0)
-            black.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
-        else if (map[i] == 1)
-            //wood.push(new Sprite({'on': spriteWoodDownAnim, 'off': spriteWoodAnim}, 'on', col * blockSize, row * blockSize, 50, 50, 100))
-            wood.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
-        else if (map[i] == 2)
-            stone.push(new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize));
-        else if (map[i] == 3)
-            finish = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
-        else if (map[i] == 4)
-            start = new Rectangle(col * blockSize, row * blockSize, blockSize, blockSize);
-        col++;
-        if (col >= columns) {
-            row++;
-            col = 0;
-        }
-    }
-
-    //worldWidth=columns*blockSize;
-    //worldHeight=row*blockSize;
-}
-
-var cam=new Camera();
-var aTimer=0;
-var spritesheet=new Image();
-    spritesheet.src='img/sprites2.png';
-    
-     Rectangle.prototype.drawImageArea=function(ctx,cam,img,sx,sy,sw,sh){
-        if(cam!=null){
-            if(img.width)
-                ctx.drawImage(img,sx,sy,sw,sh,this.x-cam.x,this.y-cam.y,this.width,this.height);
-            else
-                ctx.strokeRect(this.x-cam.x,this.y-cam.y,this.width,this.height);
-        }
-        else{
-            if(img.width)
-                ctx.drawImage(img,sx,sy,sw,sh,this.x,this.y,this.width,this.height);
-            else
-                ctx.strokeRect(this.x,this.y,this.width,this.height);
-        }
-    }
-
-    function Camera(){
-        this.x=0;
-        this.y=0;
-    }
