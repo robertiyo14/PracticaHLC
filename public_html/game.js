@@ -28,6 +28,7 @@ function marcarBotones(x) {
             instrucciones.style.display = "none";
             about.style.display = "none";
             //La funcion init es la que inicia el juego
+            CONTMAP = 0;
             init();
             break;
             //Muestra las instrucciones
@@ -74,6 +75,7 @@ var player = null;
 var then = Date.now();
 var pause = false;
 var gameover;
+var win;
 
 //Variables para el key listener
 var keysDown = {};
@@ -89,8 +91,12 @@ var tabla = new Image();
 tabla.src = 'img/tabla.png';
 var piedra = new Image();
 piedra.src = 'img/piedra.png';
+var endingdoor = new Image();
+endingdoor.src = 'img/fin.png';
 var gameoverImg = new Image();
 gameoverImg.src = 'img/gameover.png';
+var winImg = new Image();
+winImg.src = 'img/win.png';
 
 //Componentes del mapa
 var stone;
@@ -100,7 +106,9 @@ var start;
 var finish;
 
 //Declaración de mapas
-var map = [
+var CONTMAP = 0;
+
+var m0 = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 4, 0, 1, 1, 1, 1, 1, 0,
     0, 1, 1, 0, 1, 0, 0, 0, 1, 0,
@@ -110,6 +118,33 @@ var map = [
     0, 0, 0, 0, 0, 0, 0, 0, 3, 0
 ];
 
+var m1 = [
+    0,0,0,0,0,0,0,0,0,0,
+    0,4,1,1,2,1,1,2,1,0,
+    0,0,0,0,0,0,0,0,1,0,
+    0,0,1,1,1,1,1,2,1,0,
+    0,0,2,0,0,0,0,0,0,0,
+    3,1,1,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0
+];
+    
+var m2 = [
+    0,0,0,0,0,3,0,0,0,0,
+    0,2,1,1,1,2,0,0,4,0,
+    0,1,0,0,0,0,0,0,1,0,
+    0,1,0,0,0,0,0,0,1,0,
+    0,1,0,0,0,0,0,0,1,0,
+    0,2,1,1,1,1,1,1,2,0,
+    0,0,0,0,0,0,0,0,0,0
+];
+
+var map = [m0, m1, m2];
+
+/*********************************************************************/
+/*                           Funciones                               */
+/*********************************************************************/
+
+//Para cargar el juego y cada pantalla
 function init() {
     stone = [];
     wood = [];
@@ -117,9 +152,11 @@ function init() {
     start = new Rectangle();
     finish = new Rectangle();
     gameover = false;
+    win = false;
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-    setMap(map, 10, 50);
+    setMap(map[CONTMAP], 10, 50);
+    //Declaración y creación del personaje
     var spriteTiles = new Tileset('img/sprite.png', 32, 32);
     var spriteLeftAnim = new Animation(spriteTiles, ['0,1', '1,1', '2,1'], 200);
     var spriteRightAnim = new Animation(spriteTiles, ['0,2', '1,2', '2,2'], 200);
@@ -137,9 +174,7 @@ function init() {
             35, //Tamaño y
             100 //Velocidad
             );
-    
     setInterval(run, 10);
-    //run();
 }
 
 //Desglosar la matriz del mapa en arrays con los componentes
@@ -167,19 +202,15 @@ function setMap(map, columns, blockSize) {
     }
 }
 
-function imageLoaded() {
-    game.imagesLoaded++;
-}
-
+//Imagen para el sprite
 function Tileset(image, tileWidth, tileHeight) {
     this.image = new Image();
-    game.images++;
-    this.image.onload = imageLoaded;
     this.image.src = image;
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
 }
 
+//Datos de la animación
 function Animation(tileset, frames, frameDuration) {
     this.tileset = tileset;
     this.frames = frames;
@@ -188,6 +219,7 @@ function Animation(tileset, frames, frameDuration) {
     this.frameDuration = frameDuration;
 }
 
+//Datos del personaje
 function Sprite(stateAnimations, startingState, x, y, width, height, speed) {
     this.stateAnimations = stateAnimations;
     this.currentState = startingState;
@@ -198,6 +230,7 @@ function Sprite(stateAnimations, startingState, x, y, width, height, speed) {
     this.speed = speed;
 }
 
+//Dibujar el personaje
 function drawSprite(sprite) {
     ctx.drawImage(
             sprite.stateAnimations[sprite.currentState].tileset.image,
@@ -212,6 +245,7 @@ function drawSprite(sprite) {
             );
 }
 
+//Transacciones del sprite del personaje
 function updateAnimation(anim) {
     if (Date.now() - anim.frameTimer > anim.frameDuration) {
         if (anim.currentFrame < anim.frames.length - 1)
@@ -222,12 +256,27 @@ function updateAnimation(anim) {
     }
 }
 
-var game = {
-    images: 0,
-    imagesLoaded: 0,
-    backgroundColor: '#000'
-};
+//Función para crear objetos rectangulares.
+function Rectangle(x, y, width, height) {
+    this.x = (x == null) ? 0 : x;
+    this.y = (y == null) ? 0 : y;
+    this.width = (width == null) ? 0 : width;
+    this.height = (height == null) ? this.width : height;
+    this.state = 11;
+}
 
+/*********************************************************************/
+/*                          Controles                                */
+/*********************************************************************/
+
+//Hace correr el juego
+function run() {
+    update((Date.now() - then) / 1000);
+    render();
+    then = Date.now();
+}
+
+//Listeners
 window.addEventListener('keydown', function (e) {
     keysDown[e.keyCode] = true;
     lastPress = e.keyCode;
@@ -237,77 +286,65 @@ window.addEventListener('keyup', function (e) {
 });
 
 function update(mod) {
-    if(!pause && !gameover){
+    if(!pause && !gameover && !win){
+        //Tecla izquierda
         if (37 in keysDown) {
             player.currentState = 'left';
             player.x -= player.speed * mod;
             updateAnimation(player.stateAnimations[player.currentState]);
-            for(var i=0;i<black.length;i++){
-                if(player.intersects(black[i])){
-                    gameover = true;
-                }
-            }
-            interseccionMadera();
+            interseccion();
         }
+        //Tecla derecha
         else if (39 in keysDown) {
             player.currentState = 'right';
             player.x += player.speed * mod;
             updateAnimation(player.stateAnimations[player.currentState]);
-            for(var i=0;i<black.length;i++){
-                if(player.intersects(black[i])){
-                    gameover = true;
-                }
-            }
-            interseccionMadera();
+            interseccion();
         }
+        //Tecla arriba
         else if (38 in keysDown) {
             player.currentState = 'top';
             player.y -= player.speed * mod;
             updateAnimation(player.stateAnimations[player.currentState]);
-            for(var i=0;i<black.length;i++){
-                if(player.intersects(black[i])){
-                    gameover = true;
-                }
-            }
-            interseccionMadera();
+            interseccion();
             
         }
+        //Tecla abajo
         else if (40 in keysDown) {
             player.currentState = 'bot';
             player.y += player.speed * mod;
             updateAnimation(player.stateAnimations[player.currentState]);
-            for(var i=0;i<black.length;i++){
-                if(player.intersects(black[i])){
-                    gameover = true;
-                }
-            }
-            interseccionMadera();
-            
+            interseccion();
+        //Tecla P para la pausa
         } else if (lastPress == 80){
             pause = true;
             lastPress = null;
         } 
         
-            aTimer+=mod;
-            if(aTimer>1/10){
-                aTimer=0;
-                for(var i=0;i<wood.length;i++){
-                    if(wood[i].state < 10){
-                        wood[i].state++;
-                        if(wood[i].state == 10){
-                            black.push(wood[i]);
-                            var index = wood.indexOf(wood[i]);
-                            if (index > -1) {
-                                wood.splice(index, 1);
-                            }
-                        }
-                    } else if(wood[i].state > 11 && wood[i].state < 20) {
-                        wood[i].state++;
-                    } else if(wood[i].state == 20){
-                        wood[i].state = 0;
+        //Control por pulsos de tiempo
+        aTimer+=mod;
+        if(aTimer>1/10){
+            aTimer=0;
+            for(var i=0;i<wood.length;i++){
+                if(wood[i].state < 10){
+                    if(player.intersects(wood[i])){
+                        gameover = true;
                     }
+                    wood[i].state++;
+                    if(wood[i].state == 10){
+                        black.push(wood[i]);
+                        var index = wood.indexOf(wood[i]);
+                        if (index > -1) {
+                            wood.splice(index, 1);
+                        }
+                    }
+                } else if(wood[i].state > 11 && wood[i].state < 17) {
+                    wood[i].state++;
+                } else if(wood[i].state == 17){
+                    wood[i].state = 0;
                 }
             }
+        }
         
     } else if (lastPress == 80){
         pause = false;
@@ -315,18 +352,38 @@ function update(mod) {
     } else if (lastPress == 32){
         lastPress = null;
         gameover = false;
+        win = false;
+        CONTMAP = 0;
         init();
     }
 }
 
-function interseccionMadera(){
+//Control de las colisiones
+function interseccion(){
+    //Con el vacio
+    for(var i=0;i<black.length;i++){
+        if(player.intersects(black[i])){
+            gameover = true;
+        }
+    }
+    //Con las tablas
     for(var i=0;i<wood.length;i++){
         if(player.intersects(wood[i]) && wood[i].state==11){
             wood[i].state=12;
         }
     }
+    //Con la trampilla final
+    if(player.intersects(finish)){
+        CONTMAP++;
+        if(CONTMAP == map.length){
+            win = true;
+        } else {
+            init();
+        }
+    }
 }
 
+//Para saber cuando colisiona el personaje con los diferentes bloques
 Sprite.prototype.intersects = function (rect) {
     if (rect != null) {
         return(this.x < rect.x + rect.width -17 && //Izquierda
@@ -336,6 +393,10 @@ Sprite.prototype.intersects = function (rect) {
         //Los números que se restan son para compensar la posición del personaje
     }
 }
+
+/*********************************************************************/
+/*                        Dibujar canvas                             */
+/*********************************************************************/
 
 function render() {
     ctx.fillStyle = '#000';
@@ -356,42 +417,22 @@ function render() {
 
     //Pintar Inicio y fin
     ctx.drawImage(piedra, start.x, start.y);
-    ctx.drawImage(piedra, finish.x, finish.y);
+    ctx.drawImage(endingdoor, finish.x, finish.y);
 
     //Pintar Jugador
     drawSprite(player);
 
-    /*ctx.fillStyle = '#fff';
-     ctx.font = '15pt Arial';
-     ctx.textBaseline = 'top';
-     ctx.fillText('Arrow keys to move left and right', 15, 15);*/
+    //Diferentes estados del juego
     if(pause){
         ctx.fillStyle = '#fff';
         ctx.font = '80pt Arial';
         ctx.textBaseline = 'top';
         ctx.fillText('PAUSE!', 55, 95);
     }
-    
     if(gameover){
         ctx.drawImage(gameoverImg,0,0);
     }
-    
-}
-
-//Hace correr el juego
-function run() {
-    update((Date.now() - then) / 1000);
-    if (game.images == game.imagesLoaded) {
-        render();
-    }
-    then = Date.now();
-}
-
-//Función para crear objetos rectangulares.
-function Rectangle(x, y, width, height) {
-    this.x = (x == null) ? 0 : x;
-    this.y = (y == null) ? 0 : y;
-    this.width = (width == null) ? 0 : width;
-    this.height = (height == null) ? this.width : height;
-    this.state = 11;
+    if(win){
+        ctx.drawImage(winImg,0,0);
+    }  
 }
